@@ -19,7 +19,7 @@ def main():
         sum = int(sum_str)
         values = [int(value) for value in valus_str.strip().split()]
 
-        operator_matrix = list(itertools.product("+*", repeat=len(values) - 1))
+        operator_matrix = list(itertools.product("+*|", repeat=len(values) - 1))
 
         for operator_array in operator_matrix:
             sum_temp = values[0]
@@ -29,6 +29,11 @@ def main():
 
                 if operator == "+":
                     sum_temp += values[idx + 1]
+
+                if operator == "|":
+                    sum_temp = int(str(sum_temp) + str(values[idx + 1]))
+
+                    pass
 
             if sum == sum_temp:
                 total_calibration_result = total_calibration_result + sum_temp
