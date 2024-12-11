@@ -1,56 +1,48 @@
 from pathlib import Path
 from typing import List
+from functools import lru_cache
 
 
 def load_input():
     input_path = Path(__file__).parent / "input.txt"
     with open(input_path, "r") as f:
-        arr = f.readline()
-    return arr
+        data = f.readline().strip()
+    return [int(datum) for datum in data.split(" ")]
 
 
-def is_digit_length_even(num: str):
-    return len(num) % 2 == 0
+@lru_cache(maxsize=None)
+def count_after_blink(number: int, remaining_blinks: int) -> int:
+    # base condition, count +1 at final blink
+    if remaining_blinks == 0:
+        return 1
+
+    if number == 0:
+        return count_after_blink(1, remaining_blinks - 1)
+
+    num_str = str(number)
+
+    if len(num_str) % 2 == 0:
+        half_len = len(num_str) // 2
+        first_half = int(num_str[:half_len])
+        second_half = int(num_str[half_len:])
+
+        # get the calculations of both new numbers
+        return count_after_blink(first_half, remaining_blinks - 1) + count_after_blink(
+            second_half, remaining_blinks - 1
+        )
+
+    else:
+        return count_after_blink(number * 2024, remaining_blinks - 1)
 
 
-def blink(input: List[int]):
-    modified_input = input
-    ptr = 0
-
-    while 0 <= ptr < len(modified_input):
-        curr_num = str(modified_input[ptr])
-
-        if int(curr_num) == 0:
-            modified_input[ptr] = 1
-        elif is_digit_length_even(curr_num):
-            number_of_digits = len(curr_num)
-
-            first_half = int(curr_num[: number_of_digits // 2])
-            second_half = int(curr_num[number_of_digits // 2 :])
-
-            modified_input[ptr : ptr + 1] = [first_half, second_half]
-
-            ptr += 1
-        else:
-            modified_input[ptr] *= 2024
-
-        ptr += 1
-
-    return modified_input
-
-
-def part1(num_blinks: int):
-    data = load_input()
-
-    casted_data = [int(datum) for datum in data.split(" ")]
-    ptr = 0
-    while ptr < num_blinks:
-        casted_data = blink(casted_data)
-        ptr += 1
-        print(f"{len(casted_data)=} {ptr=}")
-    print(casted_data)
-    print(len(casted_data))
+def part1(casted_data: List[int], num_blinks: int):
+    total_count = 0  # for single number
+    for number in casted_data:
+        total_count += count_after_blink(number=number, remaining_blinks=num_blinks)
+    return total_count
 
 
 if __name__ == "__main__":
-    part1(num_blinks=25)
+    data = load_input()
+    blinks = part1(data, 75)
+    print(blinks)
